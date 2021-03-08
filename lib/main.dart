@@ -34,6 +34,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  var _scaffoldKey = GlobalKey<ScaffoldState>();
+
   CounterBloc _counterBloc = CounterBloc();
   // CounterCubit _counterCubit = CounterCubit();
 
@@ -46,6 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Text(widget.title),
       ),
@@ -56,29 +59,39 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(
               'You have pushed the button this many times:',
             ),
-            BlocBuilder(
+            BlocListener(
               cubit: _counterBloc,
-              builder: (context, state){
-                if(state is CounterLoading){
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-                if(state is CounterChanged){
-                  return Text(
-                    '${state.changedValue}',
-                    style: Theme.of(context).textTheme.headline4,
-                  );
-                }
-                if(state is CounterInitial){
-                  return Text(
-                    '${state.initialValue}',
-                    style: Theme.of(context).textTheme.headline4,
-                  );
-                }
-                return Container();
-              },
-            ),
+                listener: (context, state){
+                  if(state is CounterError){
+                    _scaffoldKey.currentState.showSnackBar(
+                      SnackBar(content: Text(state.errorMsg))
+                    );
+                  }
+                },
+              child: BlocBuilder(
+                cubit: _counterBloc,
+                builder: (context, state){
+                  if(state is CounterLoading){
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  if(state is CounterChanged){
+                    return Text(
+                      '${state.changedValue}',
+                      style: Theme.of(context).textTheme.headline4,
+                    );
+                  }
+                  if(state is CounterInitial){
+                    return Text(
+                      '${state.initialValue}',
+                      style: Theme.of(context).textTheme.headline4,
+                    );
+                  }
+                  return Container();
+                },
+              ),
+            )
           ],
         ),
       ),
